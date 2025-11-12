@@ -4,7 +4,7 @@ module writer_mod
 implicit none
 
     contains
-        subroutine writer(grid, nphotons)
+        subroutine writer(grid, nneutrons)
         !! subroutine to write out normalised fluence
 
             use constants,   only : fileplace
@@ -12,17 +12,17 @@ implicit none
 
             !> grid
             type(cart_grid), intent(in) :: grid
-            !> number of photons to normalise by
-            integer, intent(in) :: nphotons
+            !> number of neutrons to normalise by
+            integer, intent(in) :: nneutrons
 
             integer :: u
             
             ! normalise fluence assuming power is 1W
 
             ! write out fluence
-            open(newunit=u, file=, form="unformatted", access="stream")
-            write(u)
-            close(u)
+            ! open(newunit=u, file=, form="unformatted", access="stream")
+            ! write(u)
+            ! close(u)
 
         
         end subroutine writer

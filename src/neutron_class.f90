@@ -1,13 +1,13 @@
-module photon_class
-!! Module defines the photon class and scattering routines
+module neutron_class
+!! Module defines the neutron class and scattering routines
     
     use constants,    only : wp
     use vector_class, only : vector, inverse
-
+    
     implicit none
 
-    !> photon type. Encapsulates all information about a single photon.
-    type :: photon
+    !> neutron type. Encapsulates all information about a single neutron.
+    type :: neutron
         !> direction vector
         type(vector) :: dir
         !> Inverse direction vector (1.0 / dir). Saves some compute time
@@ -24,27 +24,27 @@ module photon_class
         real(kind=wp) :: cosp
         !> \(\phi\) \(\phi\) is the azimuthal angle in the physics spherical coordinate system
         real(kind=wp) :: phi
-        !> Boolean flag that if true photon is alive and in the simulation
+        !> Boolean flag that if true neutron is alive and in the simulation
         logical :: tflag
-        !> Current voxel which the photon is in
+        !> Current voxel which the neutron is in
         integer :: xcell, ycell, zcell
 
         contains
         procedure :: scatter
-    end type photon
+    end type neutron
 
     contains
 
     subroutine scatter(this, opt_prop)
-        !! photon scattering routine. Handles both isotropic (hgg=0) and henyey-greenstein scattering (hgg /=0)
+        !! neutron scattering routine. Handles both isotropic (hgg=0) and henyey-greenstein scattering (hgg /=0)
         !! adapted from mcxyz [https://omlc.org/software/mc/mcxyz/index.html](https://omlc.org/software/mc/mcxyz/index.html)
     
             use optical_properties_class, only : optical_properties
             use constants,    only : PI, TWOPI
             use random_mod,   only : ran2
     
-            !> photon packet
-            class(photon) :: this
+            !> neutron packet
+            class(neutron) :: this
             !> optical properties
             type(optical_properties), intent(in) :: opt_prop
     
@@ -90,4 +90,4 @@ module photon_class
     
         end subroutine scatter
 
-end module photon_class
+end module neutron_class

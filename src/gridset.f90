@@ -23,7 +23,7 @@ module gridset_mod
     end type cart_grid
 
     contains
-        subroutine gridset(grid, opt_prop, nxg, nyg, nzg, xmax, ymax, zmax)
+        subroutine gridset(grid, opt_prop, nxg, nyg, nzg, xmax, ymax, zmax, radius)
         !! Set up grids and create geometry
 
             use iarray,   only : rhokap
@@ -36,7 +36,7 @@ module gridset_mod
             !> number of voxels in each dimension
             integer,                  intent(in)  :: nxg, nyg, nzg
             !> half size of the grid in cm
-            real(kind=wp),            intent(in)  :: xmax, ymax, zmax
+            real(kind=wp),            intent(in)  :: xmax, ymax, zmax, radius
             
             !> loop variables
             integer :: i, j, k
@@ -81,7 +81,7 @@ module gridset_mod
                     do k = 1, grid%nzg
                         z = grid%zface(k) - grid%dim%z + grid%dim%z/grid%nzg
                         ! create a sphere of radius 1.
-                        if(sqrt(x**2+y**2+z**2) <= 1._wp)then
+                        if(x**2+y**2+z**2 <= radius**2)then
                             rhokap(i,j,k) = opt_prop%kappa
                         else
                             rhokap(i,j,k) = 0._wp

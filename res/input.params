@@ -1,10 +1,12 @@
-100000           nphotons
+100000           nneutrons
 1.0              xmax
 1.0              ymax
 1.0              zmax
 201              nxg
 201              nyg
 201              nzg
-10.0             mus
-0.0              mua
+0.2044535545     mus
+0.004867941773   mua
+0.06328324305    muf
 0.0              hgg
+1.0              radius
