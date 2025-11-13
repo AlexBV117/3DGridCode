@@ -57,7 +57,6 @@ contains
 
                 call update_pos(packet, grid, pos, celli, cellj, cellk, dcell, .true., dir)
             else!moved full distance
-
                 dcell = (tau - taurun) / rhokap(celli,cellj,cellk)
                 d = d + dcell
 

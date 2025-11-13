@@ -10,8 +10,6 @@ module linked_list
     private
     
     public :: list_type                !Var
-    public :: list_data_gen            !Var
-    public :: list_data_neu            !Var
     public :: list_init                !Sub
     public :: list_free                !Sub
     public :: list_insert              !Sub
@@ -19,11 +17,7 @@ module linked_list
     public :: list_get_gen             !Func
     public :: list_get_neu             !Func
     public :: list_next                !Func
-
-    ! A public variable to temporaily store the list data during initialisation
-    integer,       dimension(:), allocatable :: list_data_gen
-    type(neutron), dimension(:), allocatable :: list_data_neu
-    
+   
     ! Define the list node data type
     type :: list_type
         private
@@ -37,19 +31,16 @@ contains
   ! Initialize a head node SELF and optionally store the provided DATA.
   subroutine list_init(self, data_gen, data_neu)
     type(list_type), pointer :: self
-    integer,       dimension(:), intent(in), optional :: data_gen
-    type(neutron), dimension(:), intent(in), optional :: data_neu
-    integer :: i
+    integer,       intent(in), optional, target :: data_gen
+    type(neutron), intent(in), optional, target :: data_neu
 
     allocate(self)
     nullify(self%next)
 
     ! loop over the provided data array and create the corresponding linked list
-    if (present(data_gen) .and. present(data_neu) .and. (size(data_gen) == size(data_neu))) then
-        do i = 1, size(data_neu)
-            call list_insert(self, data_gen(i), data_neu(i))
-            self => self%next
-        end do
+    if (present(data_gen) .and. present(data_neu)) then
+        self%gen => data_gen
+        self%neu => data_neu
     else
        nullify(self%gen)
        nullify(self%neu)
@@ -89,15 +80,23 @@ contains
   ! Insert a list node after SELF containing DATA (optional)
   subroutine list_insert(self, gen, neu)
     type(list_type), pointer :: self
-    integer,       intent(in), optional :: gen    
-    type(neutron), intent(in), optional :: neu
+    integer,       intent(in), optional, target :: gen    
+    type(neutron), intent(in), optional, target :: neu
     type(list_type), pointer :: next
+    ! Pointers to copy data into list
+    integer, pointer :: gen_cpy
+    type(neutron), pointer:: neu_cpy
 
     allocate(next)
 
     if (present(gen) .and. present(neu)) then
-       next%gen = gen
-       next%neu = neu
+        allocate(gen_cpy)
+        allocate(neu_cpy)
+
+        gen_cpy = gen
+        neu_cpy = neu
+       next%gen => gen_cpy
+       next%neu => neu_cpy
     else
        nullify(next%gen)
        nullify(next%neu)
@@ -108,15 +107,16 @@ contains
   end subroutine list_insert
 
   subroutine list_append(self, gen, neu)
-    type(list_type), pointer :: self
+    type(list_type), pointer :: self, current
     integer, intent(in) :: gen
     type(neutron), intent(in) :: neu
 
-    do while (associated(self%next))
-      self => self%next
+    current => self
+    do while (associated(current%next))
+      current => current%next
     end do
     
-    call list_insert(self, gen, neu)
+    call list_insert(current, gen, neu)
   end subroutine list_append
 
   ! Return the DATA stored in the node SELF
