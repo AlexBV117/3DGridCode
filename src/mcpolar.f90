@@ -10,12 +10,12 @@ program mcpolar
     use sourceph_mod,             only : isotropic_point_src
     use utils,                    only : set_directories, str
     use writer_mod,               only : writer
-    use linked_list,              only : list_type, list_init, list_insert, list_next, list_get_gen, list_append 
+    use linked_list,              only : list_type, list_init, list_insert, list_next, list_get_gen, list_get_neu, list_append 
 
     implicit none
 
     !> variable that holds all information about the neutron to be simulated
-    type(neutron)     :: packet
+    type(neutron)     :: packet, packet_gen1
     !> variable that holds the 3D grid information
     type(cart_grid)  :: grid
     !> optical properties variable
@@ -29,7 +29,7 @@ program mcpolar
     !> temp variables related to I/O from param file
     integer :: nxg, nyg, nzg
     !> loop variable
-    integer :: i, j
+    integer :: i, j, cur_gen, prv_gen
     !> file handle
     integer :: u
     !> temp variables related to I/O from param file
@@ -78,49 +78,67 @@ program mcpolar
     nscatt = 0_wp
 
     print*,'Generating First Generation'
+    prv_gen = 0
+    cur_gen = 1
     ! Release neutron from point source
-    call isotropic_point_src(packet, grid)
-    call list_init(bank_head, 1, packet)
+    call isotropic_point_src(packet_gen1, grid)
+    call list_init(bank_head, cur_gen, packet_gen1)
     print*,'List Init'
     do i = 2, 10
-        call isotropic_point_src(packet, grid)
-        call list_append(bank_head, 1, packet)
+        call isotropic_point_src(packet_gen1, grid)
+        call list_append(bank_head, cur_gen, packet_gen1)
     end do
 
     bank_current => bank_head
     print*,'neutrons now running'
     !loop over neutrons 
-    do while (associated(list_next(bank_current)))
-        print*, list_get_gen(bank_current) 
+    do while (associated(bank_current))
+        cur_gen = list_get_gen(bank_current) 
         bank_current => list_next(bank_current)
         !display progress
-        ! if(mod(j,10000) == 0)then
-        !     print *, str(j)//' scattered neutrons completed'
-        ! end if
-
-        
+        if(cur_gen /= prv_gen)then
+            print *, 'Simulating Generation: ', cur_gen
+            prv_gen = cur_gen
+        end if
+        packet = list_get_neu(bank_current)
         ! Find scattering location
-        ! call tauint1(packet, grid)
-        ! ! neutron scatters in grid until it exits (tflag=TRUE) 
-        ! do while(.not. packet%tflag)
-        !
-        !     !interact with medium
-        !     if(ran2() < opt_prop%albedo)then
-        !         ! neutron is scattered
-        !         call packet%scatter(opt_prop)
-        !         nscatt = nscatt + 1._wp    
-        !     else
-        !         ! neutron is absorbed
-        !         packet%tflag=.true.
-        !         exit
-        !     end if
-        !
-        !     ! Find next scattering location
-        !     call tauint1(packet, grid)
-        !
-        ! end do
+        call tauint1(packet, grid)
+        ! neutron scatters in grid until it exits (tflag=TRUE) 
+        do while(.not. packet%tflag)
+            !interact with medium
+            if(ran2() < opt_prop%albedo)then
+                ! neutron is scattered
+                call packet%scatter(opt_prop)
+                nscatt = nscatt + 1._wp    
+            else
+                if (ran2() < (muf/(mua+muf))) then
+                    ! neutron has caused a fission
+                    if (ran2() < 0.56) then
+                        print*, "Two case:"
+                        do j = 0, 2
+                            print*, j
+                            call isotropic_point_src(packet_gen1, grid)
+                            call list_append(bank_head, cur_gen+1, packet)
+                        end do
+                    else   
+                        print*, "Three case:"
+                        do j = 0, 3
+                            print*, j
+                            call isotropic_point_src(packet_gen1, grid)
+                            call list_append(bank_head, cur_gen+1, packet)
+                        end do
+                    end if
+                end if
+                ! neutron is absorbed
+                packet%tflag=.true.
+                exit
+            end if
+
+            ! Find next scattering location
+            call tauint1(packet, grid)
+
+        end do
     end do      ! end loop over nph neutrons
-    print*, list_get_gen(bank_current)
     ! print*,'Average # of scatters per neutron: '//str(nscatt/(nneutrons))
     ! !write out files
     ! call writer(grid, nneutrons)
