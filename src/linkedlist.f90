@@ -29,18 +29,25 @@ module linked_list
 contains
 
   ! Initialize a head node SELF and optionally store the provided DATA.
-  subroutine list_init(self, data_gen, data_neu)
+  subroutine list_init(self, gen, neu)
     type(list_type), pointer :: self
-    integer,       intent(in), optional, target :: data_gen
-    type(neutron), intent(in), optional, target :: data_neu
+    integer,       intent(in), optional, target :: gen
+    type(neutron), intent(in), optional, target :: neu
+    integer, pointer       :: gen_cpy  
+    type(neutron), pointer :: neu_cpy
 
     allocate(self)
     nullify(self%next)
 
     ! loop over the provided data array and create the corresponding linked list
-    if (present(data_gen) .and. present(data_neu)) then
-        self%gen => data_gen
-        self%neu => data_neu
+    if (present(gen) .and. present(neu)) then
+        allocate(gen_cpy)
+        allocate(neu_cpy)
+
+        gen_cpy = gen
+        neu_cpy = neu
+        self%gen => gen_cpy
+        self%neu => neu_cpy
     else
        nullify(self%gen)
        nullify(self%neu)

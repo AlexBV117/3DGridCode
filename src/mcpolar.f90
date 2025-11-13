@@ -1,7 +1,7 @@
 program mcpolar
 
     !imports
-    use constants,                only : resdir, wp
+    use constants,                only : resdir, wp, PI
     use gridset_mod,              only : gridset, cart_grid
     use inttau2,                  only : tauint1
     use optical_properties_class, only : optical_properties, init_opt_sphere
@@ -29,11 +29,11 @@ program mcpolar
     !> temp variables related to I/O from param file
     integer :: nxg, nyg, nzg
     !> loop variable
-    integer :: i, j, cur_gen, prv_gen
+    integer :: i, j, cur_gen, prv_gen, max_gen
     !> file handle
     integer :: u
     !> temp variables related to I/O from param file
-    real(kind=wp) :: xmax, ymax, zmax, mus, mua, muf, hgg, radius
+    real(kind=wp) :: xmax, ymax, zmax, mus, mua, muf, hgg, radius, mass
     !> timing vars
     real(kind=wp) :: start, finish
 
@@ -63,12 +63,14 @@ program mcpolar
     read(u,*) mua
     read(u,*) muf
     read(u,*) hgg
-    read(u,*) radius
+    read(u,*) mass
+    read(u,*) max_gen
     close(u)
     
     print*, ''      
-
-
+    
+    radius = ((3._wp * mass)/(4._wp * PI * 19._wp))**(1.0/3.0)
+    print*, "Running sim for sphere of radius: ", radius
     !set optical properties
     call init_opt_sphere(mus, mua, muf, hgg, opt_prop)
     ! Set up grid
@@ -94,8 +96,11 @@ program mcpolar
     !loop over neutrons 
     do while (associated(bank_current))
         cur_gen = list_get_gen(bank_current) 
-        bank_current => list_next(bank_current)
         !display progress
+        if(cur_gen >= max_gen) then
+            exit
+        end if 
+
         if(cur_gen /= prv_gen)then
             print *, 'Simulating Generation: ', cur_gen
             prv_gen = cur_gen
@@ -114,18 +119,14 @@ program mcpolar
                 if (ran2() < (muf/(mua+muf))) then
                     ! neutron has caused a fission
                     if (ran2() < 0.56) then
-                        print*, "Two case:"
-                        do j = 0, 2
-                            print*, j
+                        do j = 1, 2
                             call isotropic_point_src(packet_gen1, grid)
-                            call list_append(bank_head, cur_gen+1, packet)
+                            call list_append(bank_head, cur_gen+1, packet_gen1)
                         end do
                     else   
-                        print*, "Three case:"
-                        do j = 0, 3
-                            print*, j
+                        do j = 1, 3
                             call isotropic_point_src(packet_gen1, grid)
-                            call list_append(bank_head, cur_gen+1, packet)
+                            call list_append(bank_head, cur_gen+1, packet_gen1)
                         end do
                     end if
                 end if
@@ -138,18 +139,19 @@ program mcpolar
             call tauint1(packet, grid)
 
         end do
+        bank_current => list_next(bank_current)
     end do      ! end loop over nph neutrons
     ! print*,'Average # of scatters per neutron: '//str(nscatt/(nneutrons))
-    ! !write out files
-    ! call writer(grid, nneutrons)
-    ! print*,'write done'
-    !
-    ! call cpu_time(finish)
-    !
-    ! if(finish-start >= 60._wp)then
-    !     print*,floor((finish-start)/60._wp)+mod(finish-start,60._wp)/100._wp
-    ! else
-    !     print*, 'time taken ~'//str(floor(finish-start/60._wp))//'s'
-    ! end if
+    !write out files
+    call writer(grid, bank_head, radius, max_gen)
+    print*,'write done'
+
+    call cpu_time(finish)
+
+    if(finish-start >= 60._wp)then
+        print*,floor((finish-start)/60._wp)+mod(finish-start,60._wp)/100._wp
+    else
+        print*, 'time taken ~'//str(floor(finish-start/60._wp))//'s'
+    end if
     !
 end program mcpolar

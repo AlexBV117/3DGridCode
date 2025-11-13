@@ -26,8 +26,8 @@ SRC =   $(SRC_DIR)/constants.f90 \
         $(SRC_DIR)/gridset.f90 \
         $(SRC_DIR)/inttau2.f90 \
         $(SRC_DIR)/sourceph.f90 \
-        $(SRC_DIR)/writer.f90 \
 		$(SRC_DIR)/linkedlist.f90 \
+        $(SRC_DIR)/writer.f90 \
         $(SRC_DIR)/mcpolar.f90 \
             
 OBJ := $(SRC:$(SRC_DIR)/%.f90=$(OBJ_DIR)/%.o)

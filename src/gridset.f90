@@ -36,12 +36,16 @@ module gridset_mod
             !> number of voxels in each dimension
             integer,                  intent(in)  :: nxg, nyg, nzg
             !> half size of the grid in cm
-            real(kind=wp),            intent(in)  :: xmax, ymax, zmax, radius
+            real(kind=wp)                         :: xmax, ymax, zmax, radius
             
             !> loop variables
             integer :: i, j, k
             !> temp variables
             real(kind=wp) :: x, y, z, taueq1, taupole1, taueq2, taupole2
+
+            xmax = radius
+            ymax = radius
+            zmax = radius
 
             print*, ' '
             print *, 'Setting up grid....'
