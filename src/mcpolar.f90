@@ -107,7 +107,7 @@ program mcpolar
         end if
         packet = list_get_neu(bank_current)
         ! Find scattering location
-        call tauint1(packet, grid)
+        call tauint1(packet, grid, radius)
         ! neutron scatters in grid until it exits (tflag=TRUE) 
         do while(.not. packet%tflag)
             !interact with medium
@@ -136,7 +136,7 @@ program mcpolar
             end if
 
             ! Find next scattering location
-            call tauint1(packet, grid)
+            call tauint1(packet, grid, radius)
 
         end do
         bank_current => list_next(bank_current)

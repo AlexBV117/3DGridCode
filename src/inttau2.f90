@@ -10,7 +10,7 @@ module inttau2
 
 contains
 
-    subroutine tauint1(packet, grid)
+    subroutine tauint1(packet, grid, radius)
     !! optical depth integration subroutine. The main workhorse of MCRT
 
         use gridset_mod,  only : cart_grid
@@ -26,7 +26,7 @@ contains
 
         ! intermediate position
         type(vector)  :: pos
-        real(kind=wp) :: tau, taurun, taucell, d, dcell
+        real(kind=wp) :: tau, taurun, taucell, d, dcell, radius
         integer :: celli, cellj, cellk
         logical :: dir(3)
 
@@ -74,6 +74,10 @@ contains
         packet%xcell = celli
         packet%ycell = cellj
         packet%zcell = cellk
+
+        if ((packet%pos%x**2 + packet%pos%y**2 + packet%pos%z**2) > (radius**2)) then 
+            packet%tflag = .true.
+        end if
 
     end subroutine tauint1
    
