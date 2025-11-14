@@ -3,24 +3,32 @@ module sourceph_mod
     implicit none
 
     contains
-        subroutine isotropic_point_src(packet, grid)
+        subroutine isotropic_point_src(packet, grid, pos)
         !! set intial neutron position at (0.0, 0.0, 0.0) and sample neutron direction in an isotropic manner.
 
-            use constants,    only : TWOPI, wp
-            use gridset_mod,  only :cart_grid
+            use constants,    only  : TWOPI, wp
+            use gridset_mod,  only  : cart_grid
             use neutron_class, only : neutron
-            use random_mod,   only : ran2
+            use random_mod,   only  : ran2
+            use vector_class, only  : vector
             use vector_class
 
             !> neutron object
             type(neutron),    intent(out) :: packet
+            type(vector),     optional    :: pos
             !> grid object
             type(cart_grid), intent(in)  :: grid
 
-            !set packet position
-            packet%pos%z = 0.0_wp
-            packet%pos%x = 0.0_wp
-            packet%pos%y = 0.0_wp
+
+            if (present(pos)) then
+                packet%pos%z = pos%z
+                packet%pos%x = pos%x
+                packet%pos%y = pos%y
+            else
+                packet%pos%z = 0.0_wp
+                packet%pos%x = 0.0_wp
+                packet%pos%y = 0.0_wp
+            end if
 
             ! set packet cosines
             packet%phi  = ran2()*twoPI

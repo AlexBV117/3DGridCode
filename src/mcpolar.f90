@@ -15,7 +15,7 @@ program mcpolar
     implicit none
 
     !> variable that holds all information about the neutron to be simulated
-    type(neutron)     :: packet, packet_gen1
+    type(neutron)     :: packet, packet_new
     !> variable that holds the 3D grid information
     type(cart_grid)  :: grid
     !> optical properties variable
@@ -83,12 +83,12 @@ program mcpolar
     prv_gen = 0
     cur_gen = 1
     ! Release neutron from point source
-    call isotropic_point_src(packet_gen1, grid)
-    call list_init(bank_head, cur_gen, packet_gen1)
+    call isotropic_point_src(packet_new, grid)
+    call list_init(bank_head, cur_gen, packet_new)
     print*,'List Init'
     do i = 2, 10000
-        call isotropic_point_src(packet_gen1, grid)
-        call list_append(bank_head, cur_gen, packet_gen1)
+        call isotropic_point_src(packet_new, grid)
+        call list_append(bank_head, cur_gen, packet_new)
     end do
 
     bank_current => bank_head
@@ -120,13 +120,13 @@ program mcpolar
                     ! neutron has caused a fission
                     if (ran2() < 0.56) then
                         do j = 1, 2
-                            call isotropic_point_src(packet_gen1, grid)
-                            call list_append(bank_head, cur_gen+1, packet_gen1)
+                            call isotropic_point_src(packet_new, grid, packet%pos)
+                            call list_append(bank_current, cur_gen+1, packet_new)
                         end do
                     else   
                         do j = 1, 3
-                            call isotropic_point_src(packet_gen1, grid)
-                            call list_append(bank_head, cur_gen+1, packet_gen1)
+                            call isotropic_point_src(packet_new, grid, packet%pos)
+                            call list_append(bank_current, cur_gen+1, packet_new)
                         end do
                     end if
                 end if
