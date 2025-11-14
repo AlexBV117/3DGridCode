@@ -18,7 +18,7 @@ for data_file in data_file_list:
     radius = float(match.group(1))
     mass = round(((4/3) * 19 * np.pi * (radius**3))/1_000)
     gen_data = list(data.iloc[:, 0])
-    gen = list(data.iloc[:, 1]/10)
+    gen = list(data.iloc[:, 1]/10_000)
 # # data = np.fromfile(file, dtype=np.float64, sep="")
 # # set the number of voxels here, e.g (nxg, nyg, nzg)
 # # voxels = (201, 201, 201)

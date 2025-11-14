@@ -44,7 +44,7 @@ module gridset_mod
             real(kind=wp) :: x, y, z, taueq1, taupole1, taueq2, taupole2
 
             xmax = radius
-            ymax = radius
+            ymax = radius 
             zmax = radius
 
             print*, ' '

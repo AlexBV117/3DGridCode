@@ -75,7 +75,7 @@ contains
         packet%ycell = cellj
         packet%zcell = cellk
 
-        if ((packet%pos%x**2 + packet%pos%y**2 + packet%pos%z**2) > (radius**2)) then 
+        if ((packet%pos%x**2 + packet%pos%y**2 + packet%pos%z**2) >= (radius**2)) then 
             packet%tflag = .true.
         end if
 

@@ -86,7 +86,7 @@ program mcpolar
     call isotropic_point_src(packet_gen1, grid)
     call list_init(bank_head, cur_gen, packet_gen1)
     print*,'List Init'
-    do i = 2, 10
+    do i = 2, 10000
         call isotropic_point_src(packet_gen1, grid)
         call list_append(bank_head, cur_gen, packet_gen1)
     end do
