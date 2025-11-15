@@ -83,11 +83,11 @@ program mcpolar
     prv_gen = 0
     cur_gen = 1
     ! Release neutron from point source
-    call isotropic_point_src(packet_new, grid)
+    call isotropic_point_src(packet_new, grid, radius)
     call list_init(bank_head, cur_gen, packet_new)
     print*,'List Init'
     do i = 2, 10000
-        call isotropic_point_src(packet_new, grid)
+        call isotropic_point_src(packet_new, grid, radius)
         call list_append(bank_head, cur_gen, packet_new)
     end do
 
@@ -120,12 +120,12 @@ program mcpolar
                     ! neutron has caused a fission
                     if (ran2() < 0.56) then
                         do j = 1, 2
-                            call isotropic_point_src(packet_new, grid, packet%pos)
+                            call isotropic_point_src(packet_new, grid, radius, packet%pos)
                             call list_append(bank_current, cur_gen+1, packet_new)
                         end do
                     else   
                         do j = 1, 3
-                            call isotropic_point_src(packet_new, grid, packet%pos)
+                            call isotropic_point_src(packet_new, grid, radius, packet%pos)
                             call list_append(bank_current, cur_gen+1, packet_new)
                         end do
                     end if
